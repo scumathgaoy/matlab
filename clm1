@@ -1,0 +1,131 @@
+clear
+format rat
+
+I1=[1 0 0 1 0;
+    -4 1 1 0 3;
+    -4 3 3 0 1;
+    -12 3 2 0 0];
+I2=[1 0 0 0 4;
+    6 2 2 0 2;
+    1 4 4 0 0;
+    12 2 0 0 0];
+I3=[-12 1 0 0 2;
+    24 2 1 0 1];
+dmu=2;
+looplimit=15;
+
+p=0;
+for j=1:size(I1,1)
+    for k=1:size(I2,1)
+        p=p+1;
+        A(p,:)=[I1(j,1)*I2(k,1), I1(j,2)+I2(k,2), ...
+            I1(j,3)+I2(k,3), I1(j,4), I1(j,5), I2(k,5), 0, 0];
+    end
+end
+for j=1:size(I1,1)
+    for k=1:size(I3,1)
+        p=p+1;
+        A(p,:)=[I1(j,1)*I3(k,1), I1(j,2)+I3(k,2), ...
+            I1(j,3)+I3(k,3), I1(j,4), I1(j,5), I3(k,5), 0, 0];
+    end
+end
+A1=A;
+
+terminal=0;
+loop=0;
+e=diag(ones(1,8));
+while terminal==0
+    loop=loop+1;
+    if loop>looplimit
+        disp('looplimit')
+        break
+    end
+    terminal=1;
+    m=size(A,1);
+    p=0;
+    for j=1:m
+        if A(j,1)~=0 && A(j,7)==0 && A(j,8)==0 && A(j,4)+A(j,5)~=A(j,6)
+            terminal=0;
+            if A(j,5)~=A(j,6)
+                if A(j,5)>A(j,6)
+                    b=A(j,:)-e(5,:);
+                    r=6;
+                else
+                    b=A(j,:)-e(6,:);
+                    r=5;
+                end
+                if b(5)==b(6)
+                    b(1)=b(1)/2;
+                    r=-1;
+                end
+                A(j,:)=b+e(8,:);
+                b(1)=-b(1);
+                if r~=-1
+                    p=p+1;
+                    A(m+p,:)=b+e(r,:);
+                end
+                if A(j,3)>0
+                    p=p+1;
+                    A(m+p,:)=b-e(3,:);
+                    A(m+p,1)=b(1)*b(3)*dmu;
+                end
+            else
+                b=A(j,:)-e(4,:);
+                b(1)=b(1)/2;
+                A(j,:)=b+e(7,:);
+            end
+        end
+    end
+end
+
+if terminal==1
+    A2=A; 
+    m=size(A,1);
+    for j=1:m-1
+        for k=j+1:m
+            if A(j,2:8)==A(k,2:8)
+                A(k,1)=A(k,1)+A(j,1);
+                A(j,1)=0;
+                break
+            end
+        end
+    end
+    A(A(:,1)==0,:)=[];
+    A3=A;
+    A=sortrows(A,2);
+    m=size(A,1);
+    V=[];
+    B=[];
+    for j=1:m-1
+        if A(j,7)==1 || A(j,8)==1
+            V=[V;A(j,:)];
+            A(j,1)=0;
+            continue
+        end
+        for k=j+1:m
+            if A(j,5:6)==A(k,5:6)
+                if A(j,2)<A(k,2)
+                    B=[B;A(j,:)];
+                    A(j,1)=0;
+                    break
+                end
+            end
+        end
+    end
+    A(A(:,1)==0,:)=[];
+    V=sortrows(V,-7);
+    m=size(B,1);
+    for j=1:m-1
+        for k=j+1:m
+            if B(j,5:6)==B(k,5:6)
+                if B(j,2)<B(k,2)
+                    B(j,1)=0;
+                    break
+                end
+            end
+        end
+    end
+    B(B(:,1)==0,:)=[];
+    A=[A;B];
+    A=sortrows(A,-5);
+end
