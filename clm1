@@ -32,7 +32,6 @@ for j=1:size(I1,1)
             I1(j,3)+I3(k,3), I1(j,4), I1(j,5), I3(k,5), 0, 0];
     end
 end
-A1=A;
 
 terminal=0;
 loop=0;
@@ -82,7 +81,7 @@ while terminal==0
 end
 
 if terminal==1
-    A2=A; 
+    A0=A; 
     m=size(A,1);
     for j=1:m-1
         for k=j+1:m
@@ -94,11 +93,9 @@ if terminal==1
         end
     end
     A(A(:,1)==0,:)=[];
-    A3=A;
     A=sortrows(A,2);
     m=size(A,1);
     V=[];
-    B=[];
     for j=1:m-1
         if A(j,7)==1 || A(j,8)==1
             V=[V;A(j,:)];
@@ -108,7 +105,6 @@ if terminal==1
         for k=j+1:m
             if A(j,5:6)==A(k,5:6)
                 if A(j,2)<A(k,2)
-                    B=[B;A(j,:)];
                     A(j,1)=0;
                     break
                 end
@@ -117,19 +113,6 @@ if terminal==1
     end
     A(A(:,1)==0,:)=[];
     V=sortrows(V,-7);
-    m=size(B,1);
-    for j=1:m-1
-        for k=j+1:m
-            if B(j,5:6)==B(k,5:6)
-                if B(j,2)<B(k,2)
-                    B(j,1)=0;
-                    break
-                end
-            end
-        end
-    end
-    B(B(:,1)==0,:)=[];
-    A=[A;B];
-    A=sortrows(A,-5);
+    A=sortrows(A,-5); 
 end
 end
