@@ -14,6 +14,9 @@ I3=[-12 1 0 0 2;
 dmu=2;
 looplimit=15;
 
+[A,A0,V]=F(I1,I2,I3,dmu,looplimit);
+
+function[A,A0,V]=F(I1,I2,I3,dmu,looplimit)
 p=0;
 for j=1:size(I1,1)
     for k=1:size(I2,1)
@@ -128,4 +131,5 @@ if terminal==1
     B(B(:,1)==0,:)=[];
     A=[A;B];
     A=sortrows(A,-5);
+end
 end
