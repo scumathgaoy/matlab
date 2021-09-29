@@ -1,0 +1,435 @@
+clear
+format rat
+
+looplimit=15;
+I1=[1 0 0 0 0 1 0;
+    -4 1 1 0 0 0 3;
+    -4 3 3 0 0 0 1;
+    -6 3 2 1 0 0 0];
+I2=[1 0 0 0 0 0 4;
+    6 2 2 0 0 0 2;
+    1 4 4 0 0 0 0;
+    3 2 2 1 0 0 0;
+    4 2 1 0 1 0 0];
+I3=[-6 1 0 1 0 0 2;
+    12 2 1 1 0 0 1;
+    -4 1 0 0 1 0 1];
+
+[A0,A,AA,B,V,V1,V2]=F0(I1,I2,I3,looplimit);
+
+function[A0,A,AA,B,V,V1,V2]=F0(I1,I2,I3,looplimit)
+e6=diag(ones(1,6));
+P=cell(3,1);
+P{1}=[1,1,1,0,0,1];
+for p=2:3
+    B=P{p-1};
+    m=size(B,1);
+    r=0; 
+    for j=1:m
+        b=B(j,:); 
+        B(j,:)=b+e6(2,:)+e6(3,:);
+        for k=3:4 
+            if b(k)>0
+                r=r+1;
+                B(m+r,:)=b-e6(k,:)+e6(k+1,:);
+                B(m+r,1)=b(1)*b(k);
+            end
+        end
+    end
+    m=size(B,1);
+    for j=1:m-1
+        for k=j+1:m
+            if B(j,2:6)==B(k,2:6)
+                B(k,1)=B(k,1)+B(j,1);
+                B(j,1)=0;
+                break
+            end
+        end
+    end
+    B(B(:,1)==0,:)=[];
+    P{p}=B;
+end
+
+r=0;
+A0=[];
+for j=1:size(I1,1)
+    for k=1:size(I2,1)
+        r=r+1;
+        A0(r,:)=[I1(j,1)*I2(k,1),I1(j,2:5)+I2(k,2:5),I1(j,6),I1(j,7),I2(k,7)];
+    end
+end
+for j=1:size(I1,1)
+    for k=1:size(I3,1)
+        r=r+1;
+        A0(r,:)=[I1(j,1)*I3(k,1),I1(j,2:5)+I3(k,2:5),I1(j,6),I1(j,7),I3(k,7)];
+    end
+end
+A1=Fp(A0,P);
+
+[A,A0,AA,V]=F(A1,looplimit,1);
+[V1,V2]=Fv(V);
+B=Fb(A,P,I1,looplimit);
+end
+
+function[A1]=Fp(A0,P)
+A1=[];
+for j=1:size(A0,1)
+    B=[1,0,0,0,0,0];
+    for p=1:3
+        if A0(j,p+2)>0
+            m=size(B,1);
+            n=size(P{p},1);
+            B=repmat(B,n,1);
+            for k=1:n
+                for k1=1:m
+                    r=m*k-m+k1;
+                    B(r,:)=[B(r,1)*P{p}(k,1),B(r,2:6)+A0(j,p+2)*P{p}(k,2:6)];
+                end
+            end
+        end
+    end
+    m=size(B,1);
+    b=[];
+    for k=1:m
+        b=[A0(j,1)*B(k,1),A0(j,2),B(k,2:5),0,B(k,6),0,A0(j,6:8),0,0];
+        A1=[A1;b];
+    end
+end
+end
+
+function[B]=Fb(A,P,I1,looplimit)
+m=size(A,1);
+B=[];
+for j=1:m
+    if A(j,10)==1 && A(j,13)==0 && A(j,14)==0
+        B=[B;A(j,:)];
+    end
+end
+B(:,10)=0;
+m=size(B,1);
+n=size(I1,1);
+J=[I1,zeros(n,1)];
+J(J(:,6)==1,:)=[];
+J(:,1)=-J(:,1);
+n=size(J,1);
+J=Fp(J,P);
+B=repmat(B,n,1);
+for j=1:n
+    for k=1:m
+        r=j*m-m+k;
+        B(r,:)=[B(r,1)+J(j,1),B(r,2:14)+J(j,2:14)];
+    end
+end
+[B,~,~,~]=F(B,looplimit,0);
+end
+
+function[V1,V2]=Fv(V)
+
+
+V1=V;
+V1(V1(:,11)<2,:)=[];
+V1(V1(:,12)<2,:)=[];
+V1(V1(:,13)==1,:)=[];
+V2=V;
+m=size(V2,1);
+for j=1:m
+    if V2(j,11)==0 || V2(j,11)==2 || V2(j,12)==0 || V2(j,12)==2 || V2(j,13)==1
+        V2(j,1)=0;
+    end
+end
+V2(V2(:,1)==0,:)=[];
+V2=sortrows(V2,3);
+m=size(V2,1);
+B1=[];
+for j=1:m-1
+    for k=j+1:m
+        if V2(j,11:12)==V2(k,11:12)
+            if V2(j,3)<V2(k,3)
+                B1=[B1;V2(j,:)];
+                V2(j,1)=0;
+                break
+            end
+        end
+    end
+end
+V2(V2(:,1)==0,:)=[];
+B1=sortrows(B1,3);
+m=size(B1,1);
+for j=1:m-1
+    for k=j+1:m
+        if B1(j,11:12)==B1(k,11:12)
+            if B1(j,3)<B1(k,3)
+                B1(j,1)=0;
+                break
+            end
+        end
+    end
+end
+B1(B1(:,1)==0,:)=[];
+B1=sortrows(B1,2);
+m=size(B1,1);
+for j=1:m-1
+    for k=j+1:m
+        if B1(j,11:12)==B1(k,11:12)
+            if B1(j,3)==B1(k,3) && B1(j,2)<B1(k,2)
+                B1(j,1)=0;
+                break
+            end
+        end
+    end
+end
+B1(B1(:,1)==0,:)=[];
+V2=sortrows(V2,2);
+m=size(V2,1);
+B2=[];
+for j=1:m-1
+    for k=j+1:m
+        if V2(j,11:12)==V2(k,11:12)
+            if V2(j,2)<V2(k,2) && V2(j,3)==V2(k,3)
+                B2=[B2;V2(j,:)];
+                V2(j,1)=0;
+                break
+            end
+        end
+    end
+end
+V2(V2(:,1)==0,:)=[];
+B2=sortrows(B2,3);
+m=size(B2,1);
+for j=1:m-1
+    for k=j+1:m
+        if B2(j,11:12)==B2(k,11:12)
+            if B2(j,2)<B2(k,2)
+                B2(j,1)=0;
+                break
+            end
+        end
+    end
+end
+B2(B2(:,1)==0,:)=[];
+AA=[B1;B2];
+m=size(AA,1);
+for j=1:m-1
+    for k=j+1:m
+        if AA(j,11)==AA(k,11) && AA(j,12)==AA(k,12) && AA(j,1)~=0 && AA(k,1)~=0
+            if AA(j,2)<=AA(k,2) && AA(j,3)<=AA(k,3)
+                AA(j,1)=0;
+                break
+            elseif AA(j,2)>=AA(k,2) && AA(j,3)>=AA(k,3)
+                AA(k,1)=0;
+            end
+        end
+    end
+end
+AA(AA(:,1)==0,:)=[];
+V2=sortrows([V2;AA],8);
+m=size(V2,1);
+for j=1:m-1
+    for k=j+1:m
+        if V2(j,[2 3 11 12])==V2(k,[2 3 11 12])
+            if V2(j,8)<V2(k,8)
+                V2(j,1)=0;
+            end
+        end
+    end
+end
+V2(V2(:,1)==0,:)=[];
+end
+
+function[A,A0,AA,V]=F(A,looplimit,bool)
+e14=diag(ones(1,14));
+terminal=0;
+loop=0;
+while terminal==0
+    loop=loop+1;
+    if loop>looplimit
+        disp('looplimit')
+        break
+    end
+    terminal=1;
+    m=size(A,1);
+    p=0;
+    for j=1:m
+        if A(j,10)+A(j,11)~=A(j,12) && A(j,13)==0 && A(j,14)==0
+            terminal=0;
+            if A(j,11)~=A(j,12)
+                if A(j,11)>A(j,12)
+                    b=A(j,:)-e14(11,:);
+                    r=12;
+                else
+                    b=A(j,:)-e14(12,:);
+                    r=11;
+                end
+                if b(11)==b(12)
+                    b(1)=b(1)/2;
+                    r=-1;
+                end
+                A(j,:)=b+e14(14,:);
+                b(1)=-b(1);
+                if r~=-1
+                    p=p+1;
+                    A(m+p,:)=b+e14(r,:);
+                end
+                for k=4:6
+                    if A(j,k)>0
+                        p=p+1;
+                        A(m+p,:)=b-e14(k,:)+e14(k+1,:);
+                        A(m+p,1)=b(1)*b(k);
+                    end
+                end
+                if A(j,8)>0
+                    p=p+1;
+                    A(m+p,:)=b+e14(3,:)+e14(4,:);
+                    A(m+p,1)=b(1)*b(8);
+                end
+            else
+                b=A(j,:)-e14(10,:);
+                b(1)=b(1)/2;
+                A(j,:)=b+e14(13,:);
+                if A(j,8)>0
+                    p=p+1;
+                    A(m+p,:)=b-e14(8,:)+e14(9,:);
+                    A(m+p,1)=b(1)*b(8);
+                end
+            end
+        end
+    end
+end
+if terminal==1
+    A0=A;
+    m=size(A,1);
+    for j=1:m-1
+        for k=j+1:m
+            if A(j,2:14)==A(k,2:14)
+                A(k,1)=A(k,1)+A(j,1);
+                A(j,1)=0;
+                break
+            end
+        end
+    end
+    A(A(:,1)==0,:)=[];
+    
+    m=size(A,1);
+    V=[];
+    for j=1:m
+        if A(j,11)>A(j,12)
+            A(j,[11,12])=A(j,[12,11]);
+        end
+        if A(j,13)==1 || A(j,14)==1
+            V=[V;A(j,:)];
+            A(j,1)=0;
+        end
+    end
+    A(A(:,1)==0,:)=[];
+    
+    A=sortrows(A,3);
+    m=size(A,1);
+    B1=[];
+    for j=1:m-1
+        for k=j+1:m
+            if A(j,10)==0
+                if A(j,11:12)==A(k,11:12)
+                    if A(j,3)<A(k,3) && ((A(k,1)>0 && bool==1)||(bool==0))
+                        B1=[B1;A(j,:)];
+                        A(j,1)=0;
+                        break
+                    end
+                end
+            end
+        end
+    end
+    A(A(:,1)==0,:)=[];
+    B1=sortrows(B1,3);
+    m=size(B1,1);
+    for j=1:m-1
+        for k=j+1:m
+            if B1(j,1)~=0
+                if B1(j,11:12)==B1(k,11:12)
+                    if B1(j,3)<B1(k,3)
+                        B1(j,1)=0;
+                        break
+                    elseif B1(j,2)==B1(k,2)
+                        if B1(j,8)<B1(k,8)
+                            B1(j,1)=0;
+                            break
+                        else
+                            B1(k,1)=0;
+                        end
+                    end
+                end
+            end
+        end
+    end
+    B1(B1(:,1)==0,:)=[];
+    m=size(B1,1);
+    B1=sortrows(B1,2);
+    for j=1:m-1
+        for k=j+1:m
+            if B1(j,11:12)==B1(k,11:12)
+                if B1(j,2)<B1(k,2)
+                    B1(j,1)=0;
+                    break
+                end
+            end
+        end
+    end
+    B1(B1(:,1)==0,:)=[];
+    
+    A=sortrows(A,2);
+    m=size(A,1);
+    B2=[];
+    for j=1:m-1
+        for k=j+1:m
+            if A(j,10)==0 && A(j,3)==A(k,3)
+                if A(j,11:12)==A(k,11:12)
+                    if A(j,2)<A(k,2) && ((A(k,1)>0 && bool==1)||(bool==0))
+                        B2=[B2;A(j,:)];
+                        A(j,1)=0;
+                        break
+                    end
+                end
+            end
+        end
+    end
+    A(A(:,1)==0,:)=[];
+    B2=sortrows(B2,2);
+    m=size(B2,1);
+    for j=1:m-1
+        for k=j+1:m
+            if B2(j,10)==0 && B2(j,3)==B2(k,3) && B2(j,1)~=0
+                if B2(j,11:12)==B2(k,11:12)
+                    if B2(j,2)<B2(k,2)
+                        B2(j,1)=0;
+                        break
+                    elseif B2(j,2)==B2(k,2)
+                        if B2(j,8)<B2(k,8)
+                            B2(j,1)=0;
+                            break
+                        else
+                            B2(k,1)=0;
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+B2(B2(:,1)==0,:)=[];
+AA=[B1;B2];
+m=size(AA,1);
+for j=1:m-1
+    for k=j+1:m
+        if AA(j,11)==AA(k,11) && AA(j,12)==AA(k,12) && AA(j,1)~=0 && AA(k,1)~=0
+            if AA(j,2)<=AA(k,2) && AA(j,3)<=AA(k,3)
+                AA(j,1)=0;
+                break
+            elseif AA(j,2)>=AA(k,2) && AA(j,3)>=AA(k,3)
+                AA(k,1)=0;
+            end
+        end
+    end
+end
+AA(AA(:,1)==0,:)=[];
+AA=sortrows(AA,-11);
+A=sortrows(A,-11);
+end
