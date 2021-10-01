@@ -266,7 +266,7 @@ while N~=0
         A=Ut(A);
         A=Rt(A);
         n=n+8;
-        str=[str '(U'' F'' U F U R U'' R'') '];
+        str=[str '(F'' U F U R U'' R'') '];
     end
 end
 str=['Step3(' num2str(n) '): ' str '. '];
