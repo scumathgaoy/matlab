@@ -1,0 +1,641 @@
+clear
+close all
+step0;
+function[]=step0()
+A=(1:6)'.*ones(6,9);
+[A,str0]=rand(A,8);
+G(A);
+[A,str1]=step1(A);
+G(A);
+[A,str2]=step2(A);
+G(A);
+[A,str3]=step3(A);
+G(A);
+[A,str4]=step4(A);
+G(A);
+[A,str5]=step5(A);
+G(A);
+disp(str0)
+disp(str1)
+disp(str2)
+disp(str3)
+disp(str4)
+disp(str5)
+end
+function[A,str]=step1(A)
+n=0;
+str='';
+N=(A(6,6)~=1)+(A(6,2)~=1)+(A(6,4)~=1)+(A(6,8)~=1);
+while N~=0
+    while A(6,6)==1
+        A=U(A);
+        n=n+1;
+        str=[str 'U '];
+    end
+    if A(1,4)==1 || A(1,2)==1 || A(1,6)==1 || A(1,8)==1
+        while A(1,4)~=1
+            A=D(A);
+            n=n+1;
+            str=[str 'D '];
+        end
+        A=R(A);
+        A=R(A);
+        n=n+1;
+        str=[str 'R2 '];
+        N=N-1;
+    elseif A(2,2)==1 || A(3,2)==1 || A(4,2)==1 || A(5,2)==1
+        while A(2,2)~=1
+            A=D(A);
+            n=n+1;
+            str=[str 'D '];
+        end
+        A=R(A);
+        A=d(A);
+        A=Rt(A);
+        n=n+3;
+        str=[str '(R d R'') '];
+        N=N-1;
+    elseif A(2,6)==1 || A(3,6)==1 || A(4,6)==1 || A(5,6)==1
+        while A(3,6)~=1
+            A=d(A);
+            n=n+1;
+            str=[str 'd '];
+        end
+        A=R(A);
+        n=n+1;
+        str=[str 'R '];
+        N=N-1;
+    elseif A(2,4)==1 || A(3,4)==1 || A(4,4)==1 || A(5,4)==1
+        while A(5,4)~=1
+            A=d(A);
+            n=n+1;
+            str=[str 'd '];
+        end
+        A=Rt(A);
+        n=n+1;
+        str=[str 'R'' '];
+        N=N-1;
+    elseif A(2,8)==1 || A(3,8)==1 || A(4,8)==1 || A(5,8)==1
+        while A(2,8)~=1
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        A=R(A);
+        A=dt(A);
+        A=R(A);
+        n=n+3;
+        str=[str '(R d'' R) '];
+        N=N-1;
+    end
+end
+N=4;
+while N~=0
+    A=U(A);
+    n=n+1;
+    str=[str 'U '];
+    if A(6,6)==1 && A(2,8)==A(2,5)
+        A=R(A);
+        A=R(A);
+        n=n+2;
+        str=[str 'R2 '];
+        N=N-1;
+    end
+    if A(6,2)==1 && A(3,8)==A(3,5)
+        A=F(A);
+        A=F(A);
+        n=n+2;
+        str=[str 'F2 '];
+        N=N-1;
+    end
+    if A(6,4)==1 && A(4,8)==A(4,5)
+        A=L(A);
+        A=L(A);
+        n=n+2;
+        str=[str 'L2 '];
+        N=N-1;
+    end
+    if A(6,8)==1 && A(5,8)==A(5,5)
+        A=B(A);
+        A=B(A);
+        n=n+2;
+        str=[str 'B2 '];
+        N=N-1;
+    end
+end
+str=['Step1(' num2str(n) '): ' str '. '];
+end
+function[A,str]=step2(A)
+n=0;
+str='';
+N=(A(2,1)~=A(2,2) || A(3,3)~=A(3,2))+(A(3,1)~=A(3,2) || A(4,3)~=A(4,2))+...
+    (A(4,1)~=A(4,2) || A(5,3)~=A(5,2))+(A(5,1)~=A(5,2) || A(2,3)~=A(2,2));
+while N~=0
+    if A(2,7)==1 || A(3,7)==1 || A(4,7)==1 || A(5,7)==1
+        while A(5,7)~=1
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        while A(2,5)~=A(6,9)
+            A=d(A);
+            n=n+1;
+            str=[str 'd '];
+        end
+        A=Ft(A);
+        A=U(A);
+        A=F(A);
+        n=n+3;
+        str=[str '(F'' U F) '];
+        N=N-1;
+    elseif A(2,9)==1 || A(3,9)==1 || A(4,9)==1 || A(5,9)==1
+        while A(4,9)~=1
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        while A(3,5)~=A(6,1)
+            A=d(A);
+            n=n+1;
+            str=[str 'd '];
+        end
+        A=R(A);
+        A=Ut(A);
+        A=Rt(A);
+        n=n+3;
+        str=[str '(R U'' R'') '];
+        N=N-1;
+    elseif A(6,1)==1 || A(6,3)==1 || A(6,7)==1 || A(6,9)==1
+        while A(6,7)~=1
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        while A(2,5)~=A(5,9)
+            A=d(A);
+            n=n+1;
+            str=[str 'd '];
+        end
+        A=R(A);
+        A=U(A);
+        A=Rt(A);
+        A=U(A);
+        A=R(A);
+        A=Ut(A);
+        A=Rt(A);
+        n=n+7;
+        str=[str '(R U R'' U R U'' R'') '];
+        N=N-1;
+    else
+        while A(2,1)==A(2,2) && A(3,3)==A(3,2)
+            A=d(A);
+            n=n+1;
+            str=[str 'd '];
+        end
+        A=R(A);
+        A=U(A);
+        A=Rt(A);
+        n=n+3;
+        str=[str '(R U R'') '];
+    end
+end
+str=['Step2(' num2str(n) '): ' str '. '];
+end
+function[A,str]=step3(A)
+n=0;
+str='';
+N=(A(2,4)~=A(2,5) || A(3,6)~=A(3,5))+(A(3,4)~=A(3,5) || A(4,6)~=A(4,5))+...
+    (A(4,4)~=A(4,5) || A(5,6)~=A(5,5))+(A(5,4)~=A(5,5) || A(2,6)~=A(2,5));
+while N~=0
+    if (A(6,6)~=6 && A(2,8)~=6) || (A(6,2)~=6 && A(3,8)~=6 )...
+            ||(A(6,4)~=6 && A(4,8)~=6 ) || (A(6,8)~=6 && A(5,8)~=6)
+        while A(6,6)==6 || A(2,8)==6
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        if A(6,6)-A(2,8)==1 || (A(6,6)==2 && A(2,8)==5)
+            while A(2,8)~=A(2,5)
+                A=d(A);
+                n=n+1;
+                str=[str 'd '];
+            end
+            A=Ut(A);
+            A=Ft(A);
+            A=U(A);
+            A=F(A);
+            A=U(A);
+            A=R(A);
+            A=Ut(A);
+            A=Rt(A);
+            n=n+8;
+            str=[str '(U'' F'' U F U R U'' R'') '];
+            N=N-1;
+        else
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+            while A(3,8)~=A(3,5)
+                A=d(A);
+                n=n+1;
+                str=[str 'd '];
+            end
+            A=U(A);
+            A=R(A);
+            A=Ut(A);
+            A=Rt(A);
+            A=Ut(A);
+            A=Ft(A);
+            A=U(A);
+            A=F(A);
+            n=n+8;
+            str=[str '(U R U'' R'' U'' F'' U F) '];
+            N=N-1;
+        end
+    else
+        while A(2,4)==A(2,5) && A(3,6)==A(3,5)
+            A=d(A);
+            n=n+1;
+            str=[str 'd '];
+        end
+        A=Ft(A);
+        A=U(A);
+        A=F(A);
+        A=U(A);
+        A=R(A);
+        A=Ut(A);
+        A=Rt(A);
+        n=n+8;
+        str=[str '(U'' F'' U F U R U'' R'') '];
+    end
+end
+str=['Step3(' num2str(n) '): ' str '. '];
+end
+function[A,str]=step4(A)
+n=0;
+str='';
+while A(6,2)~=6 || A(6,4)~=6 || A(6,6)~=6 || A(6,8)~=6
+    if (A(6,2)~=6 && A(6,8)~=6) || (A(6,4)~=6 && A(6,6)~=6)
+        if A(6,4)==6 && A(6,6)==6
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        A=L(A);
+        A=F(A);
+        A=U(A);
+        A=Ft(A);
+        A=Ut(A);
+        A=Lt(A);
+        n=n+6;
+        str=[str '(L F U F'' U'' L'')'];
+    else
+        while A(6,2)~=6 || A(6,4)~=6
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        A=l(A);
+        A=F(A);
+        A=U(A);
+        A=Ft(A);
+        A=Ut(A);
+        A=lt(A);
+        n=n+6;
+        str=[str '(l F U F'' U'' l'')'];
+    end
+end
+N=(A(6,1)~=6)+(A(6,3)~=6)+(A(6,7)~=6)+(A(6,9)~=6);
+while N~=0
+    if N==3
+        while A(6,7)~=6
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        if A(4,9)==6
+            [A,n,str]=fishF(A,n,str);
+        else
+            [A,n,str]=fishR(A,n,str);
+        end
+    elseif N==4
+        if A(5,9)==6
+            [A,n,str]=fishF(A,n,str);
+        else
+            [A,n,str]=fishR(A,n,str);
+        end
+    else
+        while A(6,7)==6
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        if A(5,9)==6
+            [A,n,str]=fishR(A,n,str);
+        else
+            [A,n,str]=fishF(A,n,str);
+        end
+    end
+    N=(A(6,1)~=6)+(A(6,3)~=6)+(A(6,7)~=6)+(A(6,9)~=6);
+end
+str=['Step4(' num2str(n) '): ' str '. '];
+end
+function[A,str]=step5(A)
+n=0;
+str='';
+while A(2,7)~=A(2,8) || A(2,8)~=A(2,9) || A(3,7)~=A(3,8) || A(3,8)~=A(3,9)...
+        || A(4,7)~=A(4,8) || A(4,8)~=A(4,9) || A(5,7)~=A(5,8) || A(5,8)~=A(5,9)
+    N=(A(2,7)==A(2,9))+(A(3,7)==A(3,9))+(A(4,7)==A(4,9))+(A(5,7)==A(5,9));
+    if N==4
+        if A(2,7)==A(2,8) || A(3,7)==A(3,8) || A(4,7)==A(4,8) || A(5,7)==A(5,8)
+            while A(2,7)~=A(2,8)
+                A=U(A);
+                n=n+1;
+                str=[str 'U '];
+            end
+            if abs(A(2,8)-A(3,8))==2
+                [A,n,str]=fishF(A,n,str);
+                A=U(A);
+                A=U(A);
+                n=n+2;
+                str=[str 'U2 '];
+                [A,n,str]=fishR(A,n,str);
+            else
+                A=U(A);
+                n=n+1;
+                str=[str 'U '];
+                [A,n,str]=fishR(A,n,str);
+                A=U(A);
+                A=U(A);
+                n=n+2;
+                str=[str 'U2 '];
+                [A,n,str]=fishF(A,n,str);
+            end
+        else
+            if abs(A(2,7)-A(2,8))==2
+                [A,n,str]=Lshape(A,n,str);
+            else
+                [A,n,str]=fishR(A,n,str);
+                A=U(A);
+                A=U(A);
+                n=n+2;
+                str=[str 'U2 '];
+                [A,n,str]=fishF(A,n,str);
+            end
+        end
+    elseif N>0
+        while A(2,7)~=A(2,9)
+            A=U(A);
+            n=n+1;
+            str=[str 'U '];
+        end
+        [A,n,str]=Lshape(A,n,str);
+    else
+        [A,n,str]=Lshape(A,n,str);
+    end
+end
+while A(2,8)~=A(2,5)
+    A=U(A);
+    n=n+1;
+    str=[str 'U '];
+end
+str=['Step5(' num2str(n) '): ' str '. '];
+end
+function[A,str]=rand(A,n)
+str='';
+for j=1:n
+    k=randi([1,6]);
+    if k==1
+        str=[str 'D '];
+        A=D(A);
+    elseif k==2
+        str=[str 'R '];
+        A=R(A);
+    elseif k==3
+        str=[str 'F '];
+        A=F(A);
+    elseif k==4
+        str=[str 'L '];
+        A=L(A);
+    elseif k==5
+        str=[str 'B '];
+        A=B(A);
+    elseif k==6
+        str=[str 'U '];
+        A=U(A);
+    end
+end
+str=['Start: ' str '. '];
+end
+function[]=G(A)
+Col=[0.95,0.95,0.95;0,0.9,0;0.9,0,0;0,0,0.9;0.95,0.3,0;0.95,0.95,0];
+P=cell(6,16);
+for j=1:16
+    P{1,j}=[4-ceil(j/4),4-rem(j,4)-4*(rem(j,4)==0),0];
+    P{2,j}=[4-rem(j,4)-4*(rem(j,4)==0),3,floor(j/4)-(rem(j,4)==0)];
+    P{3,j}=[3,rem(j,4)-1+4*(rem(j,4)==0),floor(j/4)-(rem(j,4)==0)];
+    P{4,j}=[rem(j,4)-1+4*(rem(j,4)==0),0,floor(j/4)-(rem(j,4)==0)];
+    P{5,j}=[0,4-rem(j,4)-4*(rem(j,4)==0),floor(j/4)-(rem(j,4)==0)];
+    P{6,j}=[4-ceil(j/4),rem(j,4)-1+4*(rem(j,4)==0),3];
+end
+C=cell(6,9);
+for j=1:6
+    for k=1:9
+        n=floor(k/3-0.1);
+        C{j,k}=[P{j,k+n};P{j,k+n+1};P{j,k+n+5};P{j,k+n+4}];
+    end
+end
+figure
+axis equal
+view([0.7,1,1])
+hold on
+for j=1:6
+    for k=1:9
+        fill3(C{j,k}(:,1),C{j,k}(:,2),C{j,k}(:,3),Col(A(j,k),:))
+    end
+end
+end
+function[A]=R(A)
+A(2,:)=A(2,[3,6,9,2,5,8,1,4,7]);
+Q=[1,1,4,7;3,9,6,3;6,9,6,3;5,1,4,7];
+A=S(A,Q);
+end
+function[A]=Rt(A)
+A(2,:)=A(2,[7,4,1,8,5,2,9,6,3]);
+Q=[1,1,4,7;5,1,4,7;6,9,6,3;3,9,6,3];
+A=S(A,Q);
+end
+function[A]=r(A)
+A(2,:)=A(2,[3,6,9,2,5,8,1,4,7]);
+Q=[1,1,4,7;3,9,6,3;6,9,6,3;5,1,4,7];
+A=S(A,Q);
+Q=[1,2,5,8;3,8,5,2;6,8,5,2;5,2,5,8];
+A=S(A,Q);
+end
+function[A]=rt(A)
+A(2,:)=A(2,[7,4,1,8,5,2,9,6,3]);
+Q=[1,1,4,7;5,1,4,7;6,9,6,3;3,9,6,3];
+A=S(A,Q);
+Q=[1,2,5,8;5,2,5,8;6,8,5,2;3,8,5,2];
+A=S(A,Q);
+end
+function[A]=F(A)
+A(3,:)=A(3,[3,6,9,2,5,8,1,4,7]);
+Q=[1,1,2,3;4,3,6,9;6,1,2,3;2,7,4,1];
+A=S(A,Q);
+end
+function[A]=Ft(A)
+A(3,:)=A(3,[7,4,1,8,5,2,9,6,3]);
+Q=[1,1,2,3;2,7,4,1;6,1,2,3;4,3,6,9];
+A=S(A,Q);
+end
+function[A]=f(A)
+A(3,:)=A(3,[3,6,9,2,5,8,1,4,7]);
+Q=[1,1,2,3;4,3,6,9;6,1,2,3;2,7,4,1];
+A=S(A,Q);
+Q=[2,2,5,8;1,6,5,4;4,8,5,2;6,6,5,4];
+A=S(A,Q);
+end
+function[A]=ft(A)
+A(3,:)=A(3,[7,4,1,8,5,2,9,6,3]);
+Q=[1,1,2,3;2,7,4,1;6,1,2,3;4,3,6,9];
+A=S(A,Q);
+Q=[2,2,5,8;6,6,5,4;4,8,5,2;1,6,5,4];
+A=S(A,Q);
+end
+function[A]=U(A)
+A(6,:)=A(6,[3,6,9,2,5,8,1,4,7]);
+Q=[2,7,8,9;3,7,8,9;4,7,8,9;5,7,8,9];
+A=S(A,Q);
+end
+function[A]=Ut(A)
+A(6,:)=A(6,[7,4,1,8,5,2,9,6,3]);
+Q=[2,7,8,9;5,7,8,9;4,7,8,9;3,7,8,9];
+A=S(A,Q);
+end
+function[A]=u(A)
+A(6,:)=A(6,[3,6,9,2,5,8,1,4,7]);
+Q=[2,7,8,9;3,7,8,9;4,7,8,9;5,7,8,9];
+A=S(A,Q);
+Q=[2,4,5,6;3,4,5,6;4,4,5,6;5,4,5,6];
+A=S(A,Q);
+end
+function[A]=ut(A)
+A(6,:)=A(6,[7,4,1,8,5,2,9,6,3]);
+Q=[2,7,8,9;5,7,8,9;4,7,8,9;3,7,8,9];
+A=S(A,Q);
+Q=[2,4,5,6;5,4,5,6;4,4,5,6;3,4,5,6];
+A=S(A,Q);
+end
+function[A]=L(A)
+A(4,:)=A(4,[3,6,9,2,5,8,1,4,7]);
+Q=[1,3,6,9;5,3,6,9;6,7,4,1;3,7,4,1];
+A=S(A,Q);
+end
+function[A]=Lt(A)
+A(4,:)=A(4,[7,4,1,8,5,2,9,6,3]);
+Q=[1,3,6,9;3,7,4,1;6,7,4,1;5,3,6,9];
+A=S(A,Q);
+end
+function[A]=l(A)
+A(4,:)=A(4,[3,6,9,2,5,8,1,4,7]);
+Q=[1,3,6,9;5,3,6,9;6,7,4,1;3,7,4,1];
+A=S(A,Q);
+Q=[1,2,5,8;5,2,5,8;6,8,5,2;3,8,5,2];
+A=S(A,Q);
+end
+function[A]=lt(A)
+A(4,:)=A(4,[7,4,1,8,5,2,9,6,3]);
+Q=[1,3,6,9;3,7,4,1;6,7,4,1;5,3,6,9];
+A=S(A,Q);
+Q=[1,2,5,8;3,8,5,2;6,8,5,2;5,2,5,8];
+A=S(A,Q);
+end
+function[A]=D(A)
+A(1,:)=A(1,[3,6,9,2,5,8,1,4,7]);
+Q=[2,1,2,3;5,1,2,3;4,1,2,3;3,1,2,3];
+A=S(A,Q);
+end
+function[A]=Dt(A)
+A(1,:)=A(1,[7,4,1,8,5,2,9,6,3]);
+Q=[2,1,2,3;3,1,2,3;4,1,2,3;5,1,2,3];
+A=S(A,Q);
+end
+function[A]=d(A)
+A(1,:)=A(1,[3,6,9,2,5,8,1,4,7]);
+Q=[2,1,2,3;5,1,2,3;4,1,2,3;3,1,2,3];
+A=S(A,Q);
+Q=[2,4,5,6;5,4,5,6;4,4,5,6;3,4,5,6];
+A=S(A,Q);
+end
+function[A]=dt(A)
+A(1,:)=A(1,[7,4,1,8,5,2,9,6,3]);
+Q=[2,1,2,3;3,1,2,3;4,1,2,3;5,1,2,3];
+A=S(A,Q);
+Q=[2,4,5,6;3,4,5,6;4,4,5,6;5,4,5,6];
+A=S(A,Q);
+end
+function[A]=B(A)
+A(5,:)=A(5,[3,6,9,2,5,8,1,4,7]);
+Q=[1,7,8,9;2,9,6,3;6,7,8,9;4,1,4,7];
+A=S(A,Q);
+end
+function[A]=Bt(A)
+A(5,:)=A(5,[7,4,1,8,5,2,9,6,3]);
+Q=[1,7,8,9;4,1,4,7;6,7,8,9;2,9,6,3];
+A=S(A,Q);
+end
+function[A]=b(A)
+A(5,:)=A(5,[3,6,9,2,5,8,1,4,7]);
+Q=[1,7,8,9;2,9,6,3;6,7,8,9;4,1,4,7];
+A=S(A,Q);
+Q=[1,4,5,6;2,8,5,2;6,4,5,6;4,2,5,8];
+A=S(A,Q);
+end
+function[A,n,str]=fishF(A,n,str)
+A=F(A);
+A=U(A);
+A=Ft(A);
+A=U(A);
+A=F(A);
+A=U(A);
+A=U(A);
+A=Ft(A);
+n=n+8;
+str=[str '(F U F'' U F U2 F'') '];
+end
+function[A,n,str]=fishR(A,n,str)
+A=Rt(A);
+A=Ut(A);
+A=R(A);
+A=Ut(A);
+A=Rt(A);
+A=U(A);
+A=U(A);
+A=R(A);
+n=n+8;
+str=[str '(R'' U'' R U'' R'' U2 R) '];
+end
+function[A,n,str]=Lshape(A,n,str)
+A=R(A);
+A=R(A);
+A=F(A);
+A=F(A);
+A=Rt(A);
+A=Bt(A);
+A=R(A);
+A=F(A);
+A=F(A);
+A=Rt(A);
+A=B(A);
+A=Rt(A);
+n=n+12;
+str=[str '(R2 F2 R'' B'' R F2 R'' B R'') '];
+end
+function[A]=S(A,Q)
+a=A(Q(4,1),Q(4,2:4));
+for j=4:-1:2
+    A(Q(j,1),Q(j,2:4))=A(Q(j-1,1),Q(j-1,2:4));
+end
+A(Q(1,1),Q(1,2:4))=a;
+end
