@@ -1,0 +1,200 @@
+clear
+close all
+
+A=setGlobal(7);
+A=rand(A,10);
+G(A)
+
+function[A]=setGlobal(N)
+global or T Ar str
+A=(1:6)'.*ones(6,N^2);
+or=N;
+T=repmat(or*(1:or)',1,or)-repmat(or-1:-1:0,or,1);
+T1=flipud(rot90(flipud(T'),1));
+T1=T1(:)';
+T2=flipud(rot90(flipud(T'),-1));
+T2=T2(:)';
+Ar=[T1;T2];
+str='';
+end
+function[]=G(A)
+global or
+Col=[0.95,0.95,0.95;0,0.9,0;0.9,0,0;0,0,0.9;0.95,0.3,0;0.95,0.95,0];
+P=cell(6,(or+1)^2);
+for j=1:(or+1)^2
+    P{1,j}=[(or+1)-ceil(j/(or+1)),(or+1)-rem(j,(or+1))-(or+1)*(rem(j,(or+1))==0),0];
+    P{2,j}=[(or+1)-rem(j,(or+1))-(or+1)*(rem(j,(or+1))==0),or,floor(j/(or+1))-(rem(j,(or+1))==0)];
+    P{3,j}=[or,rem(j,(or+1))-1+(or+1)*(rem(j,(or+1))==0),floor(j/(or+1))-(rem(j,(or+1))==0)];
+    P{4,j}=[rem(j,(or+1))-1+(or+1)*(rem(j,(or+1))==0),0,floor(j/(or+1))-(rem(j,(or+1))==0)];
+    P{5,j}=[0,(or+1)-rem(j,(or+1))-(or+1)*(rem(j,(or+1))==0),floor(j/(or+1))-(rem(j,(or+1))==0)];
+    P{6,j}=[(or+1)-ceil(j/(or+1)),rem(j,(or+1))-1+(or+1)*(rem(j,(or+1))==0),or];
+end
+C=cell(6,or^2);
+for j=1:6
+    for k=1:or^2
+        n=floor(k/or-0.01);
+        C{j,k}=[P{j,k+n};P{j,k+n+1};P{j,k+n+or+2};P{j,k+n+or+1}];
+    end
+end
+figure
+axis equal
+view([0.7,1,1])
+hold on
+for j=1:6
+    for k=1:or^2
+        fill3(C{j,k}(:,1),C{j,k}(:,2),C{j,k}(:,3),Col(A(j,k),:))
+    end
+end
+end
+function[A]=S(A,Q)
+global or
+a=A(Q(4,1),Q(4,2:or+1));
+for j=4:-1:2
+    A(Q(j,1),Q(j,2:or+1))=A(Q(j-1,1),Q(j-1,2:or+1));
+end
+A(Q(1,1),Q(1,2:or+1))=a;
+end
+function[A]=rand(A,m)
+global or n str
+n=0;
+str='';
+for j=1:m
+    k=randi([1,6]);
+    if k==1
+        A=D(A,randi([1,floor(or/2)]));
+    elseif k==2
+        A=R(A,randi([1,floor(or/2)]));
+    elseif k==3
+        A=F(A,randi([1,floor(or/2)]));
+    elseif k==4
+        A=L(A,randi([1,floor(or/2)]));
+    elseif k==5
+        A=B(A,randi([1,floor(or/2)]));
+    elseif k==6
+        A=U(A,randi([1,floor(or/2)]));
+    end
+end
+str=['Start(' num2str(n) '): ' str '. '];
+disp(str)
+end
+
+function[A]=R(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'R '];
+A(2,:)=A(2,[Ar(1,:)]);
+for j=1:m
+    Q=[1,T(:,j)';3,flip(T(:,or+1-j))';6,flip(T(:,or+1-j))';5,T(:,j)'];
+    A=S(A,Q);
+end
+end
+function[A]=Rt(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'R'' '];
+A(2,:)=A(2,[Ar(2,:)]);
+for j=1:m
+    Q=[1,T(:,j)';5,T(:,j)';6,flip(T(:,or+1-j)');3,flip(T(:,or+1-j))'];
+    A=S(A,Q);
+end
+end
+function[A]=F(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'F '];
+A(3,:)=A(3,[Ar(1,:)]);
+for j=1:m
+    Q=[1,T(j,:);4,T(:,or+1-j)';6,T(j,:);2,flip(T(:,j))'];
+    A=S(A,Q);
+end
+end
+function[A]=Ft(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'F'' '];
+A(3,:)=A(3,[Ar(2,:)]);
+for j=1:m
+    Q=[1,T(j,:);2,flip(T(:,j))';6,T(j,:);4,T(:,or+1-j)'];
+    A=S(A,Q);
+end
+end
+function[A]=U(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'U '];
+A(6,:)=A(6,[Ar(1,:)]);
+for j=1:m
+    Q=[2,T(or+1-j,:);3,T(or+1-j,:);4,T(or+1-j,:);5,T(or+1-j,:)];
+    A=S(A,Q);
+end
+end
+function[A]=Ut(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'U'' '];
+A(6,:)=A(6,[Ar(2,:)]);
+for j=1:m
+    Q=[2,T(or+1-j,:);5,T(or+1-j,:);4,T(or+1-j,:);3,T(or+1-j,:)];
+    A=S(A,Q);
+end
+end
+function[A]=L(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'L '];
+A(4,:)=A(4,[Ar(1,:)]);
+for j=1:m
+    Q=[1,T(:,or+1-j)';5,T(:,or+1-j)';6,flip(T(:,j))';3,flip(T(:,j))'];
+    A=S(A,Q);
+end
+end
+function[A]=Lt(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'L'' '];
+A(4,:)=A(4,[Ar(2,:)]);
+for j=1:m
+    Q=[1,T(:,or+1-j)';3,flip(T(:,j))';6,flip(T(:,j))';5,T(:,or+1-j)'];
+    A=S(A,Q);
+end
+end
+function[A]=D(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'D '];
+A(1,:)=A(1,[Ar(1,:)]);
+for j=1:m
+    Q=[2,T(j,:);5,T(j,:);4,T(j,:);3,T(j,:)];
+    A=S(A,Q);
+end
+end
+function[A]=Dt(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'D'' '];
+A(1,:)=A(1,[Ar(2,:)]);
+for j=1:m
+    Q=[2,T(j,:);3,T(j,:);4,T(j,:);5,T(j,:)];
+    A=S(A,Q);
+end
+end
+function[A]=B(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'B '];
+A(5,:)=A(5,[Ar(1,:)]);
+for j=1:m
+    Q=[1,T(or+1-j,:);2,flip(T(:,or+1-j))';6,T(or+1-j,:);4,T(:,j)'];
+    A=S(A,Q);
+end
+end
+function[A]=Bt(A,m)
+global or T Ar n str
+n=n+1;
+str=[str num2str(m) 'B'' '];
+A(5,:)=A(5,[Ar(2,:)]);
+for j=1:m
+    Q=[1,T(or+1-j,:);4,T(:,j)';6,T(or+1-j,:);2,flip(T(:,or+1-j))'];
+    A=S(A,Q);
+end
+end
