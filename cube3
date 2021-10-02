@@ -40,7 +40,7 @@ while N~=0
         end
         A=R(A);
         A=R(A);
-        n=n+1;
+        n=n+2;
         str=[str 'R2 '];
         N=N-1;
     elseif A(2,2)==1 || A(3,2)==1 || A(4,2)==1 || A(5,2)==1
