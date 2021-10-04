@@ -120,7 +120,34 @@ for j=1:n
         B(r,:)=[B(r,1)+J(j,1),B(r,2:14)+J(j,2:14)];
     end
 end
-[B,~,~,~]=F(B,looplimit,0);
+[B,~,~,BV]=F(B,looplimit,0);
+   BV=sortrows(BV,3);
+m=size(BV,1);
+    for j=1:m-1
+        for k=j+1:m
+                if BV(j,11:12)==BV(k,11:12)
+                    if BV(j,3)<BV(k,3)
+                        BV(j,1)=0;
+                        break
+                    end
+                end
+        end
+    end
+    BV(BV(:,1)==0,:)=[];
+   BV=sortrows(BV,2);
+m=size(BV,1);
+    for j=1:m-1
+        for k=j+1:m
+                if BV(j,11:12)==BV(k,11:12)
+                    if BV(j,2)<BV(k,2) && BV(j,3)==BV(k,3)
+                        BV(j,1)=0;
+                        break
+                    end
+                end
+        end
+    end
+    BV(BV(:,1)==0,:)=[];
+    B=[B;BV];
 end
 
 function[V1,V2]=Fv(V)
