@@ -4,9 +4,13 @@ step0
 function[]=step0
 A=setGlobal(4);
 A=rand(A,12);
+G(A)
 A=step1(A);
+G(A)
 A=step2(A);
+G(A)
 A=step3(A);
+G(A)
 A=step4(A);
 G(A)
 end
